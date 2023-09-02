@@ -14,6 +14,9 @@ class Tutor(models.Model):
     password_hash = models.CharField(max_length=257)
     salt = models.CharField(max_length=36)
 
+    def __str__(self):
+        return f"{self.tutor_name} {self.tutor_surname} ☎️ {self.phone_number}"
+
 
 class Student(models.Model):
     student_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -23,6 +26,9 @@ class Student(models.Model):
     email = models.EmailField(max_length=50)
     password_hash = models.BigIntegerField()
     salt = models.CharField(max_length=16)
+
+    def __str__(self):
+        return f"{self.student_name} {self.student_surname} ☎️ {self.phone_number}"
 
 
 class StudentTutorRelationship(models.Model):
