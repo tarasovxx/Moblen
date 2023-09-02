@@ -11,7 +11,8 @@ from .models import Tutor
 @csrf_protect
 def registry(request):
     if request.method == 'POST':
-        username = request.POST['username']
+        name = request.POST['username']
+        surname = request.POST['usersurname']
         phone = request.POST['phone']
         email = request.POST['email']
         password = request.POST['password']
@@ -25,7 +26,8 @@ def registry(request):
 
         # Создаем нового преподавателя в базе данных
         tutor = Tutor.objects.create(
-            tutor_name=username,
+            tutor_name=name,
+            tutor_surname=surname,
             phone_number=phone,
             email=email,
             password_hash=password_hash,
@@ -36,6 +38,10 @@ def registry(request):
         return redirect('registration_success')
 
     return render(request, "mainsite/registry.html")
+
+
+def get_tutor_by_uuid(uuid):
+    result = Tutor.objects.get(uuid=uuid)
 
 
 def registration_success(request):
