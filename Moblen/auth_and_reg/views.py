@@ -5,8 +5,6 @@ from .serializers import TutorSerializer
 
 
 # Create your views here.
-
-
 class TutorAPIView(viewsets.ModelViewSet):
     """
     API endpoint that allows tutors to be viewed or edited.
@@ -14,4 +12,7 @@ class TutorAPIView(viewsets.ModelViewSet):
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
     http_method_names = ['get', 'post', 'path']
+
+
+
 

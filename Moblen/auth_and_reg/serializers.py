@@ -1,7 +1,8 @@
-from django.core.validators import EmailValidator, validate_email
+from django.core.validators import EmailValidator
+from .models import Tutor, Student, StudentTutorRelationship
 from rest_framework import serializers
 
-from .models import Tutor, Student, StudentTutorRelationship
+from .validators import validate_email, validate_phone
 
 
 class TutorSerializer(serializers.ModelSerializer):
@@ -13,5 +14,8 @@ class TutorSerializer(serializers.ModelSerializer):
         #  Проверяем email
         email = data.get("email")
         validate_email(email)
+        #  Проверяем номер телефона
+        phone = data.get('phone_number')
+        validate_phone(str(phone))
 
         return data
