@@ -1,8 +1,7 @@
-from django.core.validators import EmailValidator
 from .models import Tutor, Student, StudentTutorRelationship
 from rest_framework import serializers
 
-from .validators import validate_email, validate_phone
+from .validators import validate_email, validate_phone, validate_pass_hash
 
 
 class TutorSerializer(serializers.ModelSerializer):
@@ -16,6 +15,8 @@ class TutorSerializer(serializers.ModelSerializer):
         validate_email(email)
         #  Проверяем номер телефона
         phone = data.get('phone_number')
-        validate_phone(str(phone))
-
+        validate_phone(phone)
+        #  Проверяем хэш.
+        password_hash = data.get('password_hash')
+        validate_pass_hash(password_hash)
         return data

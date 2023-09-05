@@ -11,8 +11,15 @@ class TutorAPIView(viewsets.ModelViewSet):
     """
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
-    http_method_names = ['get', 'post', 'path']
+    http_method_names = ['post', 'get', 'put', 'patch']
 
 
-
+class TutorDetailAPIView(viewsets.ModelViewSet):
+    """
+    API endpoint that allows a specific tutor to be retrieved, updated, or deleted.
+    """
+    queryset = Tutor.objects.all()
+    serializer_class = TutorSerializer
+    lookup_field = 'uuid'
+    http_method_names = ['get']
 
