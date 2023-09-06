@@ -11,7 +11,6 @@ class TutorAPIView(viewsets.ModelViewSet):
     """
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
-    http_method_names = ['post', 'get', 'put', 'patch']
 
 
 class TutorDetailAPIView(viewsets.ModelViewSet):
@@ -20,6 +19,6 @@ class TutorDetailAPIView(viewsets.ModelViewSet):
     """
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
-    lookup_field = 'uuid'
-    http_method_names = ['get']
+    lookup_field = 'tutor_uuid'
+
 

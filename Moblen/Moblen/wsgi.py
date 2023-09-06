@@ -1,5 +1,5 @@
 """
-WSGI config for Moblen project.
+WSGI Moblen for Moblen project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
