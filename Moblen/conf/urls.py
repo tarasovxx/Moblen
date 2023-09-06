@@ -9,12 +9,13 @@ from rest_framework import routers, permissions
 #  Для Swagger-a
 schema_view = get_schema_view(  # new
     openapi.Info(
-        title="Snippets API",
+        title="Moblen API",
         default_version='v1',
-        description="Test description",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
+        description="""**Сие творение предназначено для упрощения жизни многоуважаемого frontend'а моблена.**
+        ----------------------------------------------------------------------------------------------------------------------------------------
+        \nПо всем вопросам к *API* вам придется связываться со следующими разработчиками в Telegram:
+        🧑‍💻 [Сергей Гузенко](https://t.me/serguzeo)
+        🧑‍💻 [Артем Тарасов](https://t.me/tarasovxxx)""",
     ),
     # url=f'{settings.APP_URL}/api/v3/',
     patterns=[
