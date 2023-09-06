@@ -20,7 +20,7 @@ def create_bd(DB_NAME=os.getenv("DB_NAME"), DB_ADMIN_PASSWORD=os.getenv("DB_ADMI
     # (выражение "CREATE DATABASE" должно выполняться именно вне транзакции)
     conn.autocommit = True
 
-    # Запрос для создания новой базы данных "MoblenDB"
+    # Запрос для создания новой базы данных "confDB"
     create_db_query = f'CREATE DATABASE "{DB_NAME}";'
 
     # выполняем код sql
