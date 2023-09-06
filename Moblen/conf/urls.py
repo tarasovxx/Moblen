@@ -20,6 +20,7 @@ schema_view = get_schema_view(  # new
     # url=f'{settings.APP_URL}/api/v3/',
     patterns=[
         path('api/', include('auth_and_reg.urls')),
+        path('api/', include('mainsite.urls')),
     ],
     public=True,
     permission_classes=[permissions.AllowAny],
@@ -41,8 +42,9 @@ urlpatterns = [
         name='schema-json'),
 
     path('admin/', admin.site.urls),
-    path('', include("mainsite.urls")),
 
-    path('api/', include('auth_and_reg.urls'))
+    #  Регаем все апихи
+    path('api/', include('auth_and_reg.urls')),
+    path('api/', include('mainsite.urls'))
 ]
 

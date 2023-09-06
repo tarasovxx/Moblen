@@ -4,11 +4,13 @@ from .models import Tutor, Student, StudentTutorRelationship, StudentGroup, Stud
 
 # Register your models here.
 class TutorAdmin(admin.ModelAdmin):
-    list_display = ('tutor_name', 'tutor_surname', 'phone_number', 'email', 'has_access')
+    list_display = ('phone_number', 'email', 'tutor_name', 'tutor_surname', 'has_access')
+    search_fields = ('phone_number', 'email')
 
 
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('student_name', 'student_surname', 'phone_number', 'email')
+    list_display = ('phone_number', 'email', 'student_name', 'student_surname')
+    search_fields = ('phone_number', 'email')
 
 
 admin.site.register(Tutor, TutorAdmin)

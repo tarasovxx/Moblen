@@ -22,3 +22,6 @@ class TutorDetailAPIView(viewsets.ModelViewSet):
     lookup_field = 'tutor_uuid'
 
 
+
+
+
