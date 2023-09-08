@@ -30,7 +30,7 @@ urlpatterns = [
     #  Для Swagger-a.  Один для описания схемы в форматах JSON или YAML,
     #  а второй для отображения TemplateView в удобном интерактивном интерфейсе.
     path(  # new
-        'swagger-ui/',
+        'swagger/',
         TemplateView.as_view(
             template_name='swaggerui/swaggerui.html',
             extra_context={'schema_url': 'openapi-schema'}

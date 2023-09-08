@@ -24,8 +24,8 @@ class Student(models.Model):
     student_surname = models.CharField(max_length=30)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField(max_length=50)
-    password_hash = models.BigIntegerField()
-    salt = models.CharField(max_length=16)
+    password_hash = models.CharField(max_length=257)
+    salt = models.CharField(max_length=36)
 
     def __str__(self):
         return f"{self.student_name} {self.student_surname} ☎️ {self.phone_number}"
@@ -40,6 +40,10 @@ class StudentGroup(models.Model):
     group_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(Tutor, on_delete=models.CASCADE)
     group_name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return (f"{self.owner_uuid.tutor_name} {self.owner_uuid.tutor_surname}"
+                f" ☎️ {self.owner_uuid.phone_number} 👨‍👨‍👦‍👦 {self.group_name}")
 
 
 class StudentGroupRelationship(models.Model):

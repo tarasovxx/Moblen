@@ -6,4 +6,4 @@ from .models import ReferralLink
 class ReferralLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReferralLink
-        fields = ['url']
+        fields = ['owner_uuid', 'group_uuid', 'url']
