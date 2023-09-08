@@ -11,6 +11,14 @@ class CourseAPIView(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
+class CourseTutorAPIView(viewsets.ModelViewSet):
+    """
+    API endpoint that allows a specific course to be retrieved, updated, or deleted.
+    """
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    lookup_field = 'tutor_uuid'
+
 
 class CourseDetailAPIView(viewsets.ModelViewSet):
     """
