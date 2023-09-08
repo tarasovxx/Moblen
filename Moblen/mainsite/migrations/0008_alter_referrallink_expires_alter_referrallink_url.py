@@ -3,6 +3,7 @@
 import datetime
 from django.db import migrations, models
 
+
 class Migration(migrations.Migration):
     dependencies = [
         ("mainsite", "0007_alter_referrallink_expires_alter_referrallink_url"),
