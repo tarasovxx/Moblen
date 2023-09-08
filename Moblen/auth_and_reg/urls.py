@@ -16,5 +16,4 @@ urlpatterns = [
                                                                           }), name="student_api"),
     path('v1/group/', GroupAPIView.as_view({'get': 'list',
                                                    'post': 'create'}, name="group_api"))
-
 ]
