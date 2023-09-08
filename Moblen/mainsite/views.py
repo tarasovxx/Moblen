@@ -1,48 +1,32 @@
 import hashlib
 import uuid
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
+from rest_framework import viewsets
+from rest_framework.response import Response
 
-from .models import Tutor
+from .models import ReferralLink
+from .serializers import ReferralLinkSerializer
 
 
-# Create your views here.
+class ReferralLinkAPIView(viewsets.ModelViewSet):
+    queryset = ReferralLink.objects.all()
+    serializer_class = ReferralLinkSerializer
 
-@csrf_protect
-def registry(request):
-    if request.method == 'POST':
-        name = request.POST['username']
-        surname = request.POST['usersurname']
-        phone = request.POST['phone']
-        email = request.POST['email']
-        password = request.POST['password']
+    def create(self, request, *args, **kwargs):
+        owner_uuid = request.data.get('owner_uuid')
+        group_uuid = request.data.get('group_uuid')
 
-        # Генерируем случайную соль
-        salt = str(uuid.uuid4())
-
-        # Создаем хеш пароля с использованием соли
-        password_with_salt = (password + salt).encode('utf-8')
-        password_hash = hashlib.sha256(password_with_salt).hexdigest()
-
-        # Создаем нового преподавателя в базе данных
-        tutor = Tutor.objects.create(
-            tutor_name=name,
-            tutor_surname=surname,
-            phone_number=phone,
-            email=email,
-            password_hash=password_hash,
-            salt=salt
+        # Проверяем наличие объекта ReferralLink с такими owner_uuid и group_uuid
+        referral_link = get_object_or_404(
+            ReferralLink, owner_uuid=owner_uuid, group_uuid=group_uuid, expires__gt=timezone.now()
         )
 
-        # Дополнительная обработка, например, редирект на другую страницу
-        return redirect('registration_success')
+        # Если объект существует и expires еще не истек, возвращаем URL
+        if referral_link:
+            serializer = self.get_serializer(referral_link)
+            return Response(serializer.data)
 
-    return render(request, "mainsite/registry.html")
-
-
-def get_tutor_by_uuid(uuid):
-    result = Tutor.objects.get(uuid=uuid)
-
-
-def registration_success(request):
-    return render(request, "mainsite/registry_success.html")
+        # Если объект не существует или expires истек, создаем новый объект и возвращаем URL
+        return super().create(request, *args, **kwargs)
