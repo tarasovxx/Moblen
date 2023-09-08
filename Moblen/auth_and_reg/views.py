@@ -2,7 +2,6 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Tutor, Student, StudentTutorRelationship, StudentGroup, StudentGroupRelationship
 from .serializers import TutorSerializer, StudentSerializer, CreateGroupSerializer, StudentGroupRelationshipSerializer
-from mainsite.models import ReferralLink
 
 
 # Create your views here.
@@ -54,8 +53,6 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
     """
     queryset = StudentGroupRelationship.objects.all()
     serializer_class = StudentGroupRelationshipSerializer
-
-
 
 
 # class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):

@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from dotenv import load_dotenv
 load_dotenv()
-domain=os.getenv('DOMAIN')
+domain = os.getenv('DOMAIN')
 
 
 class Course(models.Model):
@@ -41,10 +41,3 @@ class Task(models.Model):
     task_answer = models.CharField(max_length=50)
     criteria = models.TextField()
 
-
-class ReferralLink(models.Model):
-    ref_id = models.AutoField(primary_key=True)  # INT AUTOINCREMENT
-    owner_uuid = models.ForeignKey(Tutor, on_delete=models.CASCADE)  # Внешний ключ на модель Tutor
-    group_uuid = models.ForeignKey(StudentGroup, on_delete=models.CASCADE)  # Внешний ключ на модель StudentGroup
-    url = models.URLField(editable=False, default="http://{}/ref/{}".format(domain, uuid.uuid4()))
-    expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(hours=2))
