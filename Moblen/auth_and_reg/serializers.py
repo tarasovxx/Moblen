@@ -28,16 +28,26 @@ class StudentSerializer(TutorSerializer):
         fields = "__all__"
 
 
-class CreateGroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
+    url = serializers.ReadOnlyField()  # Добавляем поле 'url' в сериализатор и делаем его только для чтения
+    group_uuid = serializers.ReadOnlyField()
+
     class Meta:
         model = StudentGroup
-        fields = "__all__"
+        fields = ('owner_uuid', 'group_uuid', 'group_name', 'url')  # Включаем 'url' в поля сериализатора
 
 
 class StudentGroupRelationshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentGroup
         fields = "__all__"
+
+
+class ReferralLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentGroup
+        fields = ("url",)
+
 
 
 # class RegStudentByRefLinkSerializer(serializers.ModelSerializer):

@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from dotenv import load_dotenv
 load_dotenv()
-domain=os.getenv('DOMAIN')
+domain = os.getenv('DOMAIN')
 
 
 # Create your models here.
@@ -44,7 +44,7 @@ class StudentGroup(models.Model):
     group_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(Tutor, on_delete=models.CASCADE)
     group_name = models.CharField(max_length=200)
-    url = models.TextField(unique=True, default=f"http://{domain}/ref/{uuid.uuid4()}")
+    url = models.TextField(unique=True, default=lambda: f"http://{domain}/ref/{uuid.uuid4()}")
 
     def __str__(self):
         return (f"{self.owner_uuid.tutor_name} {self.owner_uuid.tutor_surname}"
