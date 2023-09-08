@@ -21,6 +21,7 @@ schema_view = get_schema_view(  # new
     patterns=[
         path('api/', include('auth_and_reg.urls')),
         path('api/', include('mainsite.urls')),
+        path('api/', include('courses.urls'))
     ],
     public=True,
     permission_classes=[permissions.AllowAny],
@@ -45,6 +46,7 @@ urlpatterns = [
 
     #  Регаем все апихи
     path('api/', include('auth_and_reg.urls')),
-    path('api/', include('mainsite.urls'))
+    path('api/', include('mainsite.urls')),
+    path('api/', include('courses.urls'))
 ]
 
