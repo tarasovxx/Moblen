@@ -44,7 +44,7 @@ class StudentAPIView(viewsets.ModelViewSet):
 
 class StudentDetailAPIView(viewsets.ModelViewSet):
     """
-    API endpoint that allows a specific tutor to be retrieved, updated, or deleted.
+    API endpoint that allows a specific student to be retrieved, updated, or deleted.
     """
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
@@ -78,7 +78,7 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
 
 class ReferralLinkAPIView(viewsets.ModelViewSet):
     """
-    API endpoint that allows you to view the list of groups and create a new group.
+    API that allows you to get a referral link for a group
     """
     queryset = StudentGroup.objects.all()
     serializer_class = ReferralLinkSerializer
