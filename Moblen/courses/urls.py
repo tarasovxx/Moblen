@@ -1,6 +1,6 @@
 from django.urls import path
 from .models import Course, Topic, Task, TaskList
-from .views import CourseAPIView, CourseDetailAPIView, TopicAPIView, TopicDetailAPIView, TaskListAPIView, \
+from .api import CourseAPIView, CourseDetailAPIView, TopicAPIView, TopicDetailAPIView, TaskListAPIView, \
     TaskListDetailAPIView, TaskAPIView, TaskDetailAPIView, CourseTutorAPIView
 
 urlpatterns = [

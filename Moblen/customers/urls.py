@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TutorAPIView, TutorDetailAPIView, StudentAPIView, StudentDetailAPIView
+from .api import TutorAPIView, TutorDetailAPIView, StudentAPIView, StudentDetailAPIView
 
 urlpatterns = [
     path('v1/tutor/', TutorAPIView.as_view({'get': 'list',
