@@ -1,5 +1,5 @@
 
-from .models import Tutor, Student
+from .models import Tutor, Student, StudentTutorRelationship
 from rest_framework import serializers
 
 from .validators import validate_email, validate_phone, validate_pass_hash
@@ -28,6 +28,9 @@ class StudentSerializer(TutorSerializer):
         model = Student
         fields = "__all__"
 
+
+class AttachStudentToTutorSerializer(serializers.Serializer):
+    student_uuid = serializers.UUIDField()
 
 
 

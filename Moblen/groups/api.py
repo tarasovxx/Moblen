@@ -4,7 +4,6 @@ import uuid
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from customers.models import Tutor, Student
@@ -36,7 +35,11 @@ class TutorsGroupAPIView(viewsets.ModelViewSet):
         if not group_name:
             return Response({"error": "group_name is required in the request."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tutor = get_object_or_404(Tutor, tutor_uuid=owner_uuid)
+        try:
+            tutor = Tutor.objects.get(tutor_uuid=owner_uuid)
+        except Tutor.DoesNotExist:
+            return Response({"error": "Tutor not found."})
+
         student_group = StudentGroup(owner_uuid=tutor, group_name=group_name, url=generate_unique_url())
         student_group.save()
 
@@ -63,8 +66,10 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
 
     @swagger_auto_schema(responses={200: StudentSerializer(many=True)})
     def list(self, request, group_uuid=None):
-        # Получите объект группы или верните 404, если он не существует
-        group = get_object_or_404(StudentGroup, group_uuid=group_uuid)
+        try:
+            group = StudentGroup.objects.get(group_uuid=group_uuid)
+        except StudentGroup.DoesNotExist:
+            return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Получите связи StudentGroupRelationship для указанной группы
         relationships = StudentGroupRelationship.objects.filter(group=group)
@@ -85,14 +90,21 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         student_uuid = serializer.validated_data['student_uuid']
-        group = get_object_or_404(StudentGroup, group_uuid=group_uuid)
-        student = get_object_or_404(Student, student_uuid=student_uuid)
+
+        try:
+            group = StudentGroup.objects.get(group_uuid=group_uuid)
+        except StudentGroup.DoesNotExist:
+            return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            student = Student.objects.get(student_uuid=student_uuid)
+        except Student.DoesNotExits:
+            return Response({"error": "Student not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Создать новую связь StudentGroupRelationship
         relationship = StudentGroupRelationship(group=group, student=student)
         relationship.save()
 
-        serializer = StudentGroupRelationshipSerializer(relationship)
         return Response({"status": "the student has been successfully added to the group"},
                         status=status.HTTP_201_CREATED)
 

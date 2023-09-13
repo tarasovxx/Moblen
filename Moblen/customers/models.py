@@ -36,8 +36,8 @@ class Student(models.Model):
 
 
 class StudentTutorRelationship(models.Model):
-    tutor_uuid = models.ForeignKey(Tutor, on_delete=models.CASCADE)
-    student_uuid = models.ForeignKey(Student, on_delete=models.CASCADE)
+    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
 
 
