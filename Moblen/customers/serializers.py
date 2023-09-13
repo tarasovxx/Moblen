@@ -33,6 +33,11 @@ class AttachStudentToTutorSerializer(serializers.Serializer):
     student_uuid = serializers.UUIDField()
 
 
+class StudentTutorRelationshipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentTutorRelationship
+        fields = "__all__"
+
 
 
 # class RegStudentByRefLinkSerializer(serializers.ModelSerializer):

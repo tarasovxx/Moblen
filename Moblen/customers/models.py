@@ -39,6 +39,8 @@ class StudentTutorRelationship(models.Model):
     tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('student', 'tutor')
 
 
 

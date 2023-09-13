@@ -1,9 +1,13 @@
 import os
+
+from django.db import IntegrityError
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from .models import Tutor, Student, StudentTutorRelationship
-from .serializers import TutorSerializer, StudentSerializer, AttachStudentToTutorSerializer
+from .serializers import TutorSerializer, StudentSerializer, AttachStudentToTutorSerializer, \
+    StudentTutorRelationshipSerializer
 
 from dotenv import load_dotenv
 
@@ -69,12 +73,40 @@ class AttachStudentToTutorAPIView(viewsets.ModelViewSet):
         except Tutor.DoesNotExist:
             return Response({"error": "Tutor not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        relationship = StudentTutorRelationship(tutor=tutor, student=student)
-        relationship.save()
+        try:
+            relationship = StudentTutorRelationship(tutor=tutor, student=student)
+            relationship.save()
+        except IntegrityError as e:
+            return Response({"IntegrityError": "Such a record already exists"})
 
         return Response({"status": "The student is successfully attached to the tutor"},
                         status=status.HTTP_201_CREATED)
 
+
+class GetStudentsByTutorUuidAPIView(AttachStudentToTutorAPIView):
+    """
+    API that allows you to get a list of students from a specific tutor
+    """
+    queryset = StudentTutorRelationship.objects.all()
+    serializer_class = StudentTutorRelationshipSerializer
+    lookup_field = 'tutor_uuid'
+
+    @swagger_auto_schema(responses={200: StudentSerializer(many=True)})
+    def list(self, request, tutor_uuid=None):
+        try:
+            tutor = Tutor.objects.get(tutor_uuid=tutor_uuid)
+        except Tutor.DoesNotExist:
+            return Response({"error": "Tutor not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получите связи StudentGroupRelationship для указанной группы
+        relationships = StudentTutorRelationship.objects.filter(tutor=tutor)
+
+        # Извлеките список студентов из связей
+        students = [relationship.student for relationship in relationships]
+
+        # Сериализуйте список студентов и верните их в ответе
+        serializer = StudentSerializer(students, many=True)
+        return Response(serializer.data)
 
 
 # class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):

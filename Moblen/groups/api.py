@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.db import IntegrityError
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -102,8 +103,11 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
             return Response({"error": "Student not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Создать новую связь StudentGroupRelationship
-        relationship = StudentGroupRelationship(group=group, student=student)
-        relationship.save()
+        try:
+            relationship = StudentGroupRelationship(group=group, student=student)
+            relationship.save()
+        except IntegrityError as e:
+            return Response({"IntegrityError": "Such a record already exists"})
 
         return Response({"status": "the student has been successfully added to the group"},
                         status=status.HTTP_201_CREATED)
