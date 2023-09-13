@@ -1,27 +1,16 @@
-import os
 import uuid
 
 from django.db import models
 
-from dotenv import load_dotenv
-
 from courses.models import TaskList
 from customers.models import Tutor, Student
-
-load_dotenv()
-domain = os.getenv('DOMAIN')
-
-
-# Create your models here.
-def generate_unique_url():
-    return f"http://{domain}/ref/{uuid.uuid4()}"
 
 
 class StudentGroup(models.Model):
     group_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(Tutor, on_delete=models.CASCADE, editable=False)
     group_name = models.CharField(max_length=200)
-    url = models.TextField(unique=True, default=generate_unique_url())
+    url = models.TextField(unique=True)
 
     def __str__(self):
         return (f"{self.owner_uuid.tutor_name} {self.owner_uuid.tutor_surname}"

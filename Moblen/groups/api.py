@@ -11,10 +11,15 @@ from customers.models import Tutor, Student
 from .models import StudentGroup, StudentGroupRelationship
 from .serializers import TutorsGroupSerializer, StudentGroupRelationshipSerializer, \
     StudentGroupRelationshipCreateSerializer, ReferralLinkSerializer
-
+from customers.serializers import StudentSerializer
 from dotenv import load_dotenv
+
 load_dotenv()
 domain = os.getenv('DOMAIN')
+
+
+def generate_unique_url():
+    return f"http://{domain}/ref/{uuid.uuid4()}"
 
 
 # Create your views here.
@@ -32,7 +37,7 @@ class TutorsGroupAPIView(viewsets.ModelViewSet):
             return Response({"error": "group_name is required in the request."}, status=status.HTTP_400_BAD_REQUEST)
 
         tutor = get_object_or_404(Tutor, tutor_uuid=owner_uuid)
-        student_group = StudentGroup(owner_uuid=tutor, group_name=group_name)
+        student_group = StudentGroup(owner_uuid=tutor, group_name=group_name, url=generate_unique_url())
         student_group.save()
 
         serializer = TutorsGroupSerializer(student_group)
@@ -56,6 +61,21 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
     serializer_class = StudentGroupRelationshipSerializer
     lookup_field = 'group_uuid'
 
+    @swagger_auto_schema(responses={200: StudentSerializer(many=True)})
+    def list(self, request, group_uuid=None):
+        # Получите объект группы или верните 404, если он не существует
+        group = get_object_or_404(StudentGroup, group_uuid=group_uuid)
+
+        # Получите связи StudentGroupRelationship для указанной группы
+        relationships = StudentGroupRelationship.objects.filter(group=group)
+
+        # Извлеките список студентов из связей
+        students = [relationship.student for relationship in relationships]
+
+        # Сериализуйте список студентов и верните их в ответе
+        serializer = StudentSerializer(students, many=True)
+        return Response(serializer.data)
+
     @swagger_auto_schema(request_body=StudentGroupRelationshipCreateSerializer, responses={201: "the student has been "
                                                                                                 "successfully added "
                                                                                                 "to the group"})
@@ -73,7 +93,8 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
         relationship.save()
 
         serializer = StudentGroupRelationshipSerializer(relationship)
-        return Response({"status": "the student has been successfully added to the group"}, status=status.HTTP_201_CREATED)
+        return Response({"status": "the student has been successfully added to the group"},
+                        status=status.HTTP_201_CREATED)
 
 
 class ReferralLinkAPIView(viewsets.ModelViewSet):
