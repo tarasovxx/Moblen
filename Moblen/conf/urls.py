@@ -3,7 +3,7 @@ from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-from rest_framework import routers, permissions
+from rest_framework import permissions
 
 
 #  Для Swagger-a
@@ -19,8 +19,9 @@ schema_view = get_schema_view(  # new
     ),
     # url=f'{settings.APP_URL}/api/v3/',
     patterns=[
-        path('api/', include('auth_and_reg.urls')),
-        path('api/', include('mainsite.urls')),
+        path('api/', include('customers.urls')),
+        path('api/', include('courses.urls')),
+        path('api/', include('groups.urls')),
     ],
     public=True,
     permission_classes=[permissions.AllowAny],
@@ -44,7 +45,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     #  Регаем все апихи
-    path('api/', include('auth_and_reg.urls')),
-    path('api/', include('mainsite.urls'))
+    path('api/', include('customers.urls')),
+    path('api/', include('courses.urls')),
+    path('api/', include('groups.urls')),
 ]
 

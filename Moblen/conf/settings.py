@@ -39,14 +39,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mainsite',
-    'auth_and_reg',
+    'customers',
+    'groups',
     # third party package for user registration and authentication endpoints
     'djoser',
     # rest API implementation library for django
     'rest_framework',
     # JWT authentication backend library
     'rest_framework_simplejwt',
+    'courses',
 ]
 
 MIDDLEWARE = [
