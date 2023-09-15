@@ -26,8 +26,8 @@ class Student(models.Model):
     student_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student_name = models.CharField(max_length=30)
     student_surname = models.CharField(max_length=30)
-    phone_number = models.CharField(max_length=20)
-    email = models.EmailField(max_length=50)
+    phone_number = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(max_length=50, unique=True)
     password_hash = models.CharField(max_length=257)
     salt = models.CharField(max_length=36)
 

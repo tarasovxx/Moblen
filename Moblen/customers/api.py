@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from .models import Tutor, Student, StudentTutorRelationship
 from .serializers import TutorSerializer, StudentSerializer, AttachStudentToTutorSerializer, \
-    StudentTutorRelationshipSerializer
+    StudentTutorRelationshipSerializer, RegStudentByRefLinkSerializer
 
 from dotenv import load_dotenv
 
@@ -67,20 +67,47 @@ class AttachStudentToTutorAPIView(viewsets.ModelViewSet):
         try:
             student = Student.objects.get(student_uuid=student_uuid)
         except Student.DoesNotExits:
-            return Response({"error": "Student not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "NO_SUCH_STUDENT"}, status=status.HTTP_404_NOT_FOUND)
         try:
             tutor = Tutor.objects.get(tutor_uuid=tutor_uuid)
         except Tutor.DoesNotExist:
-            return Response({"error": "Tutor not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "NO_SUCH_TUTOR"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             relationship = StudentTutorRelationship(tutor=tutor, student=student)
             relationship.save()
         except IntegrityError as e:
-            return Response({"IntegrityError": "Such a record already exists"})
+            return Response({"status": "RECORD_ALREADY_EXIST"}, status=status.HTTP_200_OK)
 
-        return Response({"status": "The student is successfully attached to the tutor"},
+        return Response({"status": "SUCCESSFULLY_ADDED"},
                         status=status.HTTP_201_CREATED)
+
+
+class DeleteStudentFromTutorAPIView(viewsets.ModelViewSet):
+    """
+    API which allows you to detach a student from a tutor
+    """
+    queryset = StudentTutorRelationship.objects.all()
+    serializer_class = StudentTutorRelationshipSerializer
+
+    def destroy(self, request, tutor_uuid=None, student_uuid=None):
+        try:
+            tutor = Tutor.objects.get(tutor_uuid=tutor_uuid)
+        except Tutor.DoesNotExits:
+            return Response({"error": "NO_SUCH_TUTOR"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            student = Student.objects.get(student_uuid=student_uuid)
+        except Student.DoesNotExits:
+            return Response({"error": "NO_SUCH_STUDENT"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            relationship = StudentTutorRelationship.objects.get(tutor=tutor, student=student)
+        except StudentTutorRelationship.DoesNotExist:
+            return Response({"error": "NO_SUCH_RELATIONSHIP"}, status=status.HTTP_404_NOT_FOUND)
+
+        relationship.delete()
+
+        return Response({"status": "SUCCESSFULLY_DELETED"}, status=status.HTTP_202_ACCEPTED)
 
 
 class GetStudentsByTutorUuidAPIView(AttachStudentToTutorAPIView):
@@ -96,7 +123,7 @@ class GetStudentsByTutorUuidAPIView(AttachStudentToTutorAPIView):
         try:
             tutor = Tutor.objects.get(tutor_uuid=tutor_uuid)
         except Tutor.DoesNotExist:
-            return Response({"error": "Tutor not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "NO_SUCH_TUTOR"}, status=status.HTTP_404_NOT_FOUND)
 
         # Получите связи StudentGroupRelationship для указанной группы
         relationships = StudentTutorRelationship.objects.filter(tutor=tutor)
@@ -109,6 +136,9 @@ class GetStudentsByTutorUuidAPIView(AttachStudentToTutorAPIView):
         return Response(serializer.data)
 
 
-# class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
-#     queryset = [Student.objects.all(), ReferralLink.objects.all(), StudentGroup.objects.all()]
-#     serializer_class =
+class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = RegStudentByRefLinkSerializer
+
+    def create(self, request, *args, **kwargs):
+        pass

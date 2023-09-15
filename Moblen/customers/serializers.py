@@ -39,6 +39,8 @@ class StudentTutorRelationshipSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class RegStudentByRefLinkSerializer(StudentSerializer):
+    referral_link = serializers.URLField(required=True)
 
-# class RegStudentByRefLinkSerializer(serializers.ModelSerializer):
-#     pass
+
+

@@ -22,7 +22,6 @@ def generate_unique_url():
     return f"http://{domain}/ref/{uuid.uuid4()}"
 
 
-# Create your views here.
 class TutorsGroupAPIView(viewsets.ModelViewSet):
     """
     API endpoint that allows Tutor groups to be created or viewed.
@@ -39,7 +38,7 @@ class TutorsGroupAPIView(viewsets.ModelViewSet):
         try:
             tutor = Tutor.objects.get(tutor_uuid=owner_uuid)
         except Tutor.DoesNotExist:
-            return Response({"error": "Tutor not found."})
+            return Response({"error": "NO_SUCH_TUTOR"})
 
         student_group = StudentGroup(owner_uuid=tutor, group_name=group_name, url=generate_unique_url())
         student_group.save()
@@ -57,7 +56,7 @@ class TutorsGroupDetailAPIView(viewsets.ModelViewSet):
     lookup_field = 'group_uuid'
 
 
-class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
+class StudentInGroup(viewsets.ModelViewSet):
     """
     API endpoint that allows you to add a student to a group
     """
@@ -70,7 +69,7 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
         try:
             group = StudentGroup.objects.get(group_uuid=group_uuid)
         except StudentGroup.DoesNotExist:
-            return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "NO_SUCH_STUDENT_GROUP"}, status=status.HTTP_404_NOT_FOUND)
 
         # Получите связи StudentGroupRelationship для указанной группы
         relationships = StudentGroupRelationship.objects.filter(group=group)
@@ -82,9 +81,7 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
         serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
 
-    @swagger_auto_schema(request_body=StudentGroupRelationshipCreateSerializer, responses={201: "the student has been "
-                                                                                                "successfully added "
-                                                                                                "to the group"})
+    @swagger_auto_schema(request_body=StudentGroupRelationshipCreateSerializer, responses={201: "SUCCESSFULLY_ADDED"})
     def create(self, request, group_uuid=None):
         serializer = StudentGroupRelationshipCreateSerializer(data=request.data)
         if not serializer.is_valid():
@@ -107,10 +104,37 @@ class StudentGroupRelationshipAPIView(viewsets.ModelViewSet):
             relationship = StudentGroupRelationship(group=group, student=student)
             relationship.save()
         except IntegrityError as e:
-            return Response({"IntegrityError": "Such a record already exists"})
+            return Response({"status": "RECORD_ALREADY_EXIST"}, status=status.HTTP_200_OK)
 
-        return Response({"status": "the student has been successfully added to the group"},
+        return Response({"status": "SUCCESSFULLY_ADDED"},
                         status=status.HTTP_201_CREATED)
+
+
+class DeleteAStudentFromTheGroup(viewsets.ModelViewSet):
+    """
+    API that allows you to remove a student from a group
+    """
+    queryset = StudentGroupRelationship.objects.all()
+    serializer_class = StudentGroupRelationshipSerializer
+
+    def destroy(self, request, group_uuid=None, student_uuid=None):
+        try:
+            group = StudentGroup.objects.get(group_uuid=group_uuid)
+        except StudentGroup.DoesNotExits:
+            return Response({"error": "NO_SUCH_STUDENT_GROUP"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            student = Student.objects.get(student_uuid=student_uuid)
+        except Student.DoesNotExits:
+            return Response({"error": "NO_SUCH_STUDENT"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            relationship = StudentGroupRelationship.objects.get(group=group, student=student)
+        except StudentGroupRelationship.DoesNotExist:
+            return Response({"error": "NO_SUCH_RELATIONSHIP"}, status=status.HTTP_404_NOT_FOUND)
+
+        relationship.delete()
+
+        return Response({"status": "SUCCESSFULLY_DELETED"}, status=status.HTTP_202_ACCEPTED)
 
 
 class ReferralLinkAPIView(viewsets.ModelViewSet):
@@ -120,34 +144,29 @@ class ReferralLinkAPIView(viewsets.ModelViewSet):
     queryset = StudentGroup.objects.all()
     serializer_class = ReferralLinkSerializer
 
-    def retrieve(self, request, owner_uuid=None, group_uuid=None):
-        if owner_uuid is None or group_uuid is None:
-            return Response({"error": "Owner_uuid and Group_uuid must be provided in the URL."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+    def retrieve(self, request, group_uuid=None):
         try:
-            student_group = StudentGroup.objects.get(owner_uuid=owner_uuid, group_uuid=group_uuid)
+            student_group = StudentGroup.objects.get(group_uuid=group_uuid)
         except StudentGroup.DoesNotExist:
-            return Response({"error": "StudentGroup not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "NO_SUCH_STUDENT_GROUP"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ReferralLinkSerializer(student_group)  # Используйте ваш сериализатор для сериализации объекта
+        serializer = ReferralLinkSerializer(student_group)
         return Response({'url': serializer.data['url']})
 
     @action(detail=True, methods=['patch'])
     @swagger_auto_schema(operation_description="This request does not require a request body.")
-    def regenerate_url(self, request, owner_uuid=None, group_uuid=None):
-        if owner_uuid is None or group_uuid is None:
-            return Response({"error": "Owner_uuid and Group_uuid must be provided in the URL."},
+    def regenerate_url(self, owner_uuid=None, group_uuid=None):
+        if group_uuid is None:
+            return Response({"error": "NO_GROUP_UUID_IN_URL"},
                             status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            student_group = StudentGroup.objects.get(owner_uuid=owner_uuid, group_uuid=group_uuid)
+            student_group = StudentGroup.objects.get(group_uuid=group_uuid)
         except StudentGroup.DoesNotExist:
-            return Response({"error": "StudentGroup not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "NO_SUCH_STUDENT_GROUP"}, status=status.HTTP_404_NOT_FOUND)
 
         # Перегенерируйте поле 'url' и сохраните объект
         student_group.url = f"http://{domain}/ref/{uuid.uuid4()}"
         student_group.save()
 
-        serializer = ReferralLinkSerializer(student_group)  # Используйте ваш сериализатор для сериализации объекта
+        serializer = ReferralLinkSerializer(student_group)
         return Response({'url': serializer.data['url']})
