@@ -11,6 +11,10 @@ from .serializers import TutorSerializer, StudentSerializer, AttachStudentToTuto
 
 from dotenv import load_dotenv
 
+from groups.models import StudentGroup
+
+from groups.models import StudentGroupRelationship
+
 load_dotenv()
 domain = os.getenv('DOMAIN')
 
@@ -141,4 +145,27 @@ class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
     serializer_class = RegStudentByRefLinkSerializer
 
     def create(self, request, *args, **kwargs):
-        pass
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            #  Забираем реферальную ссылку
+            reflink = serializer.validated_data.pop("referral_link")
+
+            #  Сохраняем нового ученика
+            student_serializer = StudentSerializer(data=serializer.validated_data)
+            student_serializer.is_valid()
+            student = student_serializer.save()
+
+            #  Находим группу и тьютора по реферальной ссылке
+            group = StudentGroup.objects.get(url=reflink)
+            tutor = Tutor.objects.get(tutor_uuid=group.owner_uuid.tutor_uuid)
+
+            #  Формируем связи
+            relationship_with_tutor = StudentTutorRelationship(student=student, tutor=tutor)
+            relationship_with_group = StudentGroupRelationship(student=student, group=group)
+            relationship_with_tutor.save()
+            relationship_with_group.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'status': 'SUCCESSFULLY_ADDED'}, status=status.HTTP_201_CREATED)
