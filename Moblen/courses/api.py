@@ -18,7 +18,7 @@ class CourseTutorAPIView(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    lookup_field = 'tutor_uuid'
+    lookup_field = 'owner_uuid'
 
 
 class CourseDetailAPIView(viewsets.ModelViewSet):
