@@ -10,7 +10,7 @@ urlpatterns = [
                                                                           'delete': 'destroy'})),
     # GET, POST
     path('v1/student/in-the-group/<uuid:group_uuid>/', StudentInGroup.as_view({'get': 'list',
-                                                                      'post': 'create'})),
+                                                                               'post': 'create'})),
 
     #  DELETE
     path('v1/student/<uuid:student_uuid>/from-the-group/<uuid:group_uuid>/', DeleteAStudentFromTheGroup.as_view(

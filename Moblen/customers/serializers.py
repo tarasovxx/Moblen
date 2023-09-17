@@ -2,7 +2,7 @@
 from .models import Tutor, Student, StudentTutorRelationship
 from rest_framework import serializers
 
-from .validators import validate_email, validate_phone, validate_pass_hash
+from .validators import validate_email, validate_phone, validate_pass_hash, validate_reflink
 
 
 class TutorSerializer(serializers.ModelSerializer):
@@ -40,7 +40,11 @@ class StudentTutorRelationshipSerializer(serializers.ModelSerializer):
 
 
 class RegStudentByRefLinkSerializer(StudentSerializer):
-    referral_link = serializers.URLField(required=True)
+    referral_link = serializers.CharField(required=True, write_only=True)
 
-
-
+    def validate(self, data):
+        #  Проверяем, что такая реферальная ссылка существует.
+        validate_reflink(data.get("referral_link"))
+        #  Выполняем те же проверки, что и в классах Tutor, Student
+        super().validate(data)
+        return data
