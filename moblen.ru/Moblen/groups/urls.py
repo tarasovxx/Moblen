@@ -9,7 +9,7 @@ urlpatterns = [
                                                                           'patch': 'partial_update',
                                                                           'delete': 'destroy'})),
     # POST
-    path('v1/student/in-the-group/<uuid:group_uuid>/', StudentInGroup.as_view({'post': 'create'})),
+    path('v1/group/<uuid:group_uuid>/new-student/', StudentInGroup.as_view({'post': 'create'})),
 
     #  DELETE
     path('v1/student/<uuid:student_uuid>/from-the-group/<uuid:group_uuid>/', DeleteAStudentFromTheGroup.as_view(
