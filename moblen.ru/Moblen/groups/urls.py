@@ -8,9 +8,8 @@ urlpatterns = [
     path('v1/group/<uuid:group_uuid>/', TutorsGroupDetailAPIView.as_view({'get': 'retrieve',
                                                                           'patch': 'partial_update',
                                                                           'delete': 'destroy'})),
-    # GET, POST
-    path('v1/student/in-the-group/<uuid:group_uuid>/', StudentInGroup.as_view({'get': 'list',
-                                                                               'post': 'create'})),
+    # POST
+    path('v1/student/in-the-group/<uuid:group_uuid>/', StudentInGroup.as_view({'post': 'create'})),
 
     #  DELETE
     path('v1/student/<uuid:student_uuid>/from-the-group/<uuid:group_uuid>/', DeleteAStudentFromTheGroup.as_view(

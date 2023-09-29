@@ -1,5 +1,5 @@
 from django.core.validators import EmailValidator
-from rest_framework import serializers
+from rest_framework import serializers, validators
 import re
 
 from groups.models import StudentGroup
@@ -13,7 +13,7 @@ def validate_email(email: str):
         email_validator(email)
     except serializers.ValidationError as e:
         # Обработка ошибки валидации email
-        raise serializers.ValidationError({"error": str(e)})
+        raise serializers.ValidationError({"error": "INCORRECT_EMAIL"})
 
 
 def validate_phone(phone: int):
@@ -26,11 +26,13 @@ def validate_phone(phone: int):
         raise serializers.ValidationError({"error": "INCORRECT_PHONE_NUMBER"})
 
 
-def validate_pass_hash(password_hash: str):
-    if password_hash is None:
+def validate_password(password: str):
+    if password is None:
         return
-    if len(password_hash) != 64:
-        raise serializers.ValidationError({'error': "HASH_LENGTH_MUST_BE_64"})
+
+    pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
+    if re.match(pattern, password) is None:
+        raise serializers.ValidationError('PASSWORD_HAS_INCORRECT_FORMAT')
 
 
 def validate_reflink(reflink: str):

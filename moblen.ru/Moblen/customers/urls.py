@@ -1,11 +1,12 @@
 from django.urls import path
-from .api import TutorAPIView, TutorDetailAPIView, StudentAPIView, StudentDetailAPIView, AttachStudentToTutorAPIView, \
+from .api import TutorAPIView, TutorDetailAPIView, StudentAPIView, StudentDetailAPIView, \
+    AttachStudentToTutorAPIView, \
     GetStudentsByTutorUuidAPIView, DeleteStudentFromTutorAPIView, RegStudentByRefLinkAPIView
 
 urlpatterns = [
     #  GET, POST
-    path('v1/tutor/', TutorAPIView.as_view({'get': 'list',
-                                            'post': 'create'}), name="all_tutors_api"),
+    path('v1/tutor/', TutorAPIView.as_view({'post': 'create', 'get': 'list'}), name="create_tutor_api"),
+
     #  GET, PATCH, DELETE
     path('v1/tutor/<uuid:tutor_uuid>/', TutorDetailAPIView.as_view({'get': 'retrieve',
                                                                     'patch': 'partial_update',

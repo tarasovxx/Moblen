@@ -7,7 +7,7 @@ class TutorsGroupSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField()
     class Meta:
         model = StudentGroup
-        fields = '__all__'
+        fields = ("group_uuid", "group_name", "url")
 
 
 class StudentGroupRelationshipSerializer(serializers.ModelSerializer):
