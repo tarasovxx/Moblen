@@ -76,3 +76,12 @@ class RegStudentByRefLinkSerializer(PostStudentSerializer):
         #  Выполняем те же проверки, что и в классах Tutor, Student
         super().validate(data)
         return data
+
+
+class CheckUserSerializer(serializers.Serializer):
+    login = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        validate_password(data.get('password'))
+        return data

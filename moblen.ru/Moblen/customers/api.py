@@ -10,7 +10,8 @@ from rest_framework.response import Response
 
 from .models import Tutor, Student, StudentTutorRelationship
 from .serializers import StudentSerializer, PostStudentSerializer, AttachStudentToTutorSerializer, \
-    StudentTutorRelationshipSerializer, PostTutorSerializer, TutorSerializer, RegStudentByRefLinkSerializer
+    StudentTutorRelationshipSerializer, PostTutorSerializer, TutorSerializer, RegStudentByRefLinkSerializer, \
+    CheckUserSerializer
 
 from dotenv import load_dotenv
 
@@ -326,3 +327,88 @@ class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': 'SUCCESSFULLY_ADDED', "student": student_json.data}, status=status.HTTP_201_CREATED)
+
+
+class CheckUserAPIView(viewsets.ModelViewSet):
+    serializer_class = CheckUserSerializer
+
+    @swagger_auto_schema(responses={200: "AUTHORIZED"})
+    def update(self, request):
+        data = request.data
+
+        serializer = CheckUserSerializer(data=data)
+
+        if serializer.is_valid():
+            login = serializer.validated_data["login"]
+            password = serializer.validated_data["password"]
+
+            email = None
+            phone_number = None
+
+            if "@" in login:
+                email = login
+            else:
+                phone_number = login
+
+            if email:
+                existing_student = Student.objects.filter(email=email).first()
+                if existing_student:
+                    salt = existing_student.salt
+                    password_hash = existing_student.password_hash
+
+                    password_with_salt = password + salt
+                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
+
+                    if password_hash_input == password_hash:
+                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+                existing_tutor = Tutor.objects.filter(email=email).first()
+                if existing_tutor:
+                    salt = existing_tutor.salt
+                    password_hash = existing_tutor.password_hash
+
+                    password_with_salt = password + salt
+                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
+
+                    if password_hash_input == password_hash:
+                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
+
+                return Response({"error": "NO_SUCH_USER"})
+
+            if phone_number:
+
+                existing_student = Student.objects.filter(phone_number=phone_number).first()
+                if existing_student:
+                    salt = existing_student.salt
+                    password_hash = existing_student.password_hash
+
+                    password_with_salt = password + salt
+                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
+
+                    if password_hash_input == password_hash:
+                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
+
+                existing_tutor = Tutor.objects.filter(phone_number=phone_number).first()
+                if existing_tutor:
+                    salt = existing_tutor.salt
+                    password_hash = existing_tutor.password_hash
+
+                    password_with_salt = password + salt
+                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
+
+                    if password_hash_input == password_hash:
+                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
+
+                return Response({"error": "NO_SUCH_USER"})
+
+        else:
+            return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
