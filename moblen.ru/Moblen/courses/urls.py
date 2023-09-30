@@ -3,7 +3,7 @@ from .api import CourseTutorAPIView#, TopicCourseAPIView, TaskListTopicAPIView, 
 
 urlpatterns = [
     path('v1/courses/by-tutor/<uuid:owner_uuid>/', CourseTutorAPIView.as_view(
-        {'get': 'retrieve',
+        {'get': 'list',
          'post': 'create',
          'delete': 'destroy'}),
          name="courses_api"),

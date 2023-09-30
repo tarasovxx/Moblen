@@ -1,7 +1,7 @@
 from django.urls import path
 from .api import TutorAPIView, TutorDetailAPIView, StudentAPIView, StudentDetailAPIView, \
     AttachStudentToTutorAPIView, \
-    GetStudentsByTutorUuidAPIView, DeleteStudentFromTutorAPIView, RegStudentByRefLinkAPIView
+    GetStudentsByTutorUuidAPIView, DeleteStudentFromTutorAPIView, RegStudentByRefLinkAPIView, CheckUserAPIView
 
 urlpatterns = [
     #  GET, POST
@@ -31,6 +31,9 @@ urlpatterns = [
 
     #  POST
     path('v1/student/with-ref-link/', RegStudentByRefLinkAPIView.as_view({'post': "create"})),
+
+    # PATCH
+    path('v1/users/check-authorize/', CheckUserAPIView.as_view({'patch': "update"})),
 
 
 ]
