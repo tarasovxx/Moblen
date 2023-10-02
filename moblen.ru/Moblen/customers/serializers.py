@@ -53,6 +53,14 @@ class StudentSerializer(serializers.ModelSerializer):
                   'phone_number', 'email')
 
 
+class SwagStudentSerializer(serializers.ModelSerializer):
+    tutors = TutorSerializer(many=True, read_only=True)
+    class Meta:
+        model = Student
+        fields = ('student_uuid', 'student_name', 'student_surname', 'student_photo',
+                  'phone_number', 'email', 'tutors')
+
+
 class AttachStudentToTutorSerializer(serializers.Serializer):
     student_uuid = serializers.UUIDField()
 
@@ -85,3 +93,9 @@ class CheckUserSerializer(serializers.Serializer):
     def validate(self, data):
         validate_password(data.get('password'))
         return data
+
+
+class SwagCheckUserSerializer(serializers.Serializer):
+    status = serializers.CharField(read_only=True, default="AUTHORIZED", help_text=True)
+    role = serializers.CharField(read_only=True, default="student", help_text=True)
+    user = StudentSerializer()
