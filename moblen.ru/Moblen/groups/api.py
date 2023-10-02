@@ -4,7 +4,7 @@ import uuid
 import requests
 from conf.settings import IS_LOCAL
 from django.db import IntegrityError
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from customers.models import Tutor, Student
 from .models import StudentGroup, StudentGroupRelationship
 from .serializers import TutorsGroupSerializer, StudentGroupRelationshipSerializer, \
-    StudentGroupRelationshipCreateSerializer, ReferralLinkSerializer
+    StudentGroupRelationshipCreateSerializer, ReferralLinkSerializer, SwagTutorsGroupSerializer
 from customers.serializers import StudentSerializer
 from dotenv import load_dotenv
 
@@ -51,6 +51,8 @@ class TutorsGroupAPIView(viewsets.ModelViewSet):
         serializer = TutorsGroupSerializer(student_group)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
+    @swagger_auto_schema(responses={200: SwagTutorsGroupSerializer})
     def list(self, request, owner_uuid=None):
         try:
             tutor = Tutor.objects.get(tutor_uuid=owner_uuid)
@@ -85,6 +87,7 @@ class TutorsGroupDetailAPIView(viewsets.ModelViewSet):
     serializer_class = TutorsGroupSerializer
     lookup_field = 'group_uuid'
 
+    @swagger_auto_schema(responses={200: SwagTutorsGroupSerializer})
     def retrieve(self, request, group_uuid=None):
         try:
             group = StudentGroup.objects.get(group_uuid=group_uuid)
@@ -188,7 +191,7 @@ class ReferralLinkAPIView(viewsets.ModelViewSet):
         return Response({'url': serializer.data['url']})
 
     @action(detail=True, methods=['patch'])
-    @swagger_auto_schema(operation_description="This request does not require a request body.")
+    @swagger_auto_schema(request_body=no_body)
     def regenerate_url(self, owner_uuid=None, group_uuid=None):
         if group_uuid is None:
             return Response({"error": "NO_GROUP_UUID_IN_URL"},

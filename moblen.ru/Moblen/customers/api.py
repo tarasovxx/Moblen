@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from .models import Tutor, Student, StudentTutorRelationship
 from .serializers import StudentSerializer, PostStudentSerializer, AttachStudentToTutorSerializer, \
     StudentTutorRelationshipSerializer, PostTutorSerializer, TutorSerializer, RegStudentByRefLinkSerializer, \
-    CheckUserSerializer
+    CheckUserSerializer, SwagCheckUserSerializer, SwagStudentSerializer
 
 from dotenv import load_dotenv
 
@@ -21,6 +21,8 @@ from groups.models import StudentGroupRelationship
 
 load_dotenv()
 domain = os.getenv('DOMAIN')
+
+import customers.func
 
 
 # Create your views here.
@@ -172,6 +174,25 @@ class StudentDetailAPIView(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
     lookup_field = 'student_uuid'
+
+    @swagger_auto_schema(responses={200: SwagStudentSerializer})
+    def retrieve(self, request, student_uuid=None):
+        try:
+            student = Student.objects.get(student_uuid=student_uuid)
+        except Student.DoesNotExist:
+            return Response({"error": "NO_SUCH_STUDENT"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получите связи StudentGroupRelationship для указанной группы
+        relationships = StudentTutorRelationship.objects.filter(student=student)
+
+        # Извлеките список тьюторов из связей
+        tutors = [relationship.tutor for relationship in relationships]
+
+        # Сериализуйте список тьюторов и верните их в ответе
+        serializer = TutorSerializer(tutors, many=True)
+        resp = StudentSerializer(student).data
+        resp.update({"tutors": serializer.data})
+        return Response(resp)
 
 
 class AttachStudentToTutorAPIView(viewsets.ModelViewSet):
@@ -332,83 +353,8 @@ class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
 class CheckUserAPIView(viewsets.ModelViewSet):
     serializer_class = CheckUserSerializer
 
-    @swagger_auto_schema(responses={200: "AUTHORIZED"})
+    @swagger_auto_schema(responses={200: SwagCheckUserSerializer})
     def update(self, request):
-        data = request.data
-
-        serializer = CheckUserSerializer(data=data)
-
-        if serializer.is_valid():
-            login = serializer.validated_data["login"]
-            password = serializer.validated_data["password"]
-
-            email = None
-            phone_number = None
-
-            if "@" in login:
-                email = login
-            else:
-                phone_number = login
-
-            if email:
-                existing_student = Student.objects.filter(email=email).first()
-                if existing_student:
-                    salt = existing_student.salt
-                    password_hash = existing_student.password_hash
-
-                    password_with_salt = password + salt
-                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-                    if password_hash_input == password_hash:
-                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
+        return func.authenticate_user(request, self.serializer_class)
 
 
-                existing_tutor = Tutor.objects.filter(email=email).first()
-                if existing_tutor:
-                    salt = existing_tutor.salt
-                    password_hash = existing_tutor.password_hash
-
-                    password_with_salt = password + salt
-                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-                    if password_hash_input == password_hash:
-                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
-
-                return Response({"error": "NO_SUCH_USER"})
-
-            if phone_number:
-
-                existing_student = Student.objects.filter(phone_number=phone_number).first()
-                if existing_student:
-                    salt = existing_student.salt
-                    password_hash = existing_student.password_hash
-
-                    password_with_salt = password + salt
-                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-                    if password_hash_input == password_hash:
-                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
-
-                existing_tutor = Tutor.objects.filter(phone_number=phone_number).first()
-                if existing_tutor:
-                    salt = existing_tutor.salt
-                    password_hash = existing_tutor.password_hash
-
-                    password_with_salt = password + salt
-                    password_hash_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-                    if password_hash_input == password_hash:
-                        return Response({"status": "AUTHORIZED"}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({"error": "INCORRECT_PASSWORD"}, status=status.HTTP_400_BAD_REQUEST)
-
-                return Response({"error": "NO_SUCH_USER"})
-
-        else:
-            return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

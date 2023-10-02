@@ -1,10 +1,20 @@
 from rest_framework import serializers
-
+from customers.serializers import StudentSerializer
 from .models import StudentGroup, StudentGroupRelationship
+
+
+class SwagTutorsGroupSerializer(serializers.ModelSerializer):
+    url = serializers.ReadOnlyField()
+    students = StudentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = StudentGroup
+        fields = ("group_uuid", "group_name", "url", "students")
 
 
 class TutorsGroupSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField()
+
     class Meta:
         model = StudentGroup
         fields = ("group_uuid", "group_name", "url")
@@ -22,6 +32,7 @@ class StudentGroupRelationshipCreateSerializer(serializers.Serializer):
 
 class ReferralLinkSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField()
+
     class Meta:
         model = StudentGroup
         fields = ("url",)
