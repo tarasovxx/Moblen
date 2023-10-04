@@ -355,6 +355,6 @@ class CheckUserAPIView(viewsets.ModelViewSet):
 
     @swagger_auto_schema(responses={200: SwagCheckUserSerializer})
     def update(self, request):
-        return func.authenticate_user(request, self.serializer_class)
+        return customers.func.authenticate_user(request, self.serializer_class)
 
 
