@@ -1,12 +1,16 @@
 from django.urls import path
-from .api import CourseTutorAPIView#, TopicCourseAPIView, TaskListTopicAPIView, TaskTasklistAPIView
+from .api import CourseTutorAPIView, CourseAPIView  # , TopicCourseAPIView, TaskListTopicAPIView, TaskTasklistAPIView
 
 urlpatterns = [
-    path('v1/courses/by-tutor/<uuid:owner_uuid>/', CourseTutorAPIView.as_view(
+    path('v1/courses/by-tutor/<uuid:owner_uuid>/', CourseAPIView.as_view(
         {'get': 'list',
-         'post': 'create',
-         'delete': 'destroy'}),
+         'post': 'create'}),
          name="courses_api"),
+    path('v1/courses/by-tutor/<uuid:owner_uuid>/<uuid:course_uuid>', CourseAPIView.as_view(
+        {
+         'delete': 'destroy'
+        }),
+         name="courses_api_delete"),
     #
     # path('v1/topic/by-course/<uuid:courses_uuid>/', TopicCourseAPIView.as_view(
     #     {'get': 'retrieve',
