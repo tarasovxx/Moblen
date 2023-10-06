@@ -18,16 +18,18 @@ class Topic(models.Model):
     topic_name = models.CharField(max_length=50)
 
 
+class TaskList(models.Model):
+    list_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    topic_uuid = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    list_name = models.CharField(max_length=50)
+
 class Task(models.Model):
     task_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    topic_uuid = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    list_uuid = models.ForeignKey(TaskList, on_delete=models.CASCADE)
     task_condition = models.TextField()
     task_image = models.BinaryField(null=True, blank=True)
     task_answer = models.CharField(max_length=50)
     criteria = models.TextField()
 
 
-class TaskList(models.Model):
-    list_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    topic_uuid = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    list_name = models.CharField(max_length=50)
+

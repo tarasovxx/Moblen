@@ -7,9 +7,9 @@ class CourseAdmin(admin.ModelAdmin):
     list_display_links = ('owner_uuid',)
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('task_uuid', 'topic_uuid', 'task_condition', 'task_image', 'task_answer', 'criteria')
+    list_display = ('task_uuid', 'list_uuid', 'task_condition', 'task_image', 'task_answer', 'criteria')
     search_fields = ('task_condition',)
-    list_display_links = ('topic_uuid',)
+    list_display_links = ('list_uuid',)
 
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('topic_uuid', 'course_uuid', 'topic_name')

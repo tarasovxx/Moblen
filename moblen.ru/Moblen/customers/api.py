@@ -25,7 +25,6 @@ domain = os.getenv('DOMAIN')
 import customers.func
 
 
-# Create your views here.
 class TutorAPIView(viewsets.ModelViewSet):
     """
     API endpoint that allows tutors to be viewed or created.

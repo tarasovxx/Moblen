@@ -20,12 +20,16 @@ class CourseGetSerializer(serializers.ModelSerializer):
 
 
 class TopicSerializer(serializers.ModelSerializer):
+    topic_uuid = serializers.ReadOnlyField()
+    course_uuid = serializers.ReadOnlyField()
     class Meta:
         model = Topic
         fields = '__all__'
 
 
 class TaskListSerializer(serializers.ModelSerializer):
+    list_uuid = serializers.ReadOnlyField()
+    topic_uuid = serializers.ReadOnlyField()
     class Meta:
         model = TaskList
         fields = '__all__'
