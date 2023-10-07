@@ -26,6 +26,11 @@ class TopicSerializer(serializers.ModelSerializer):
         model = Topic
         fields = '__all__'
 
+class TopicGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ('topic_uuid', 'topic_name')
+
 
 class TaskListSerializer(serializers.ModelSerializer):
     list_uuid = serializers.ReadOnlyField()
@@ -35,12 +40,19 @@ class TaskListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TaskListGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskList
+        fields = ('list_uuid', 'list_name')
+
+
 class TaskSerializer(serializers.ModelSerializer):
+#     task_condition = serializers.CharField(required=True, write_only=True)
+#     task_image = serializers.CharField(required=True, write_only=True)
+#     task_answer = serializers.CharField(required=True, write_only=True)
+#     criteria = task_answer = serializers.CharField(required=True, write_only=True)
+
     class Meta:
         model = Task
-        fields = '__all__'
+        fields = ('task_uuid', 'task_condition', 'task_image', 'task_answer', 'criteria')
 
-class TutorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tutor
-        fields = '__all__'

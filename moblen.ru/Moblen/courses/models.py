@@ -4,8 +4,6 @@ from django.db import models
 
 from customers.models import Tutor
 
-
-
 # Create your models here.
 class Course(models.Model):
     course_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -30,6 +28,3 @@ class Task(models.Model):
     task_image = models.BinaryField(null=True, blank=True)
     task_answer = models.CharField(max_length=50)
     criteria = models.TextField()
-
-
-

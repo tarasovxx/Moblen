@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from .models import Course, Topic, Task, TaskList
 from customers.models import Tutor
 
-from .serializers import CourseSerializer, TopicSerializer, TaskSerializer, TaskListSerializer, TutorSerializer, CourseGetSerializer
+from .serializers import CourseSerializer, TopicSerializer, TaskSerializer, TaskListSerializer, \
+    CourseGetSerializer, TopicGetSerializer, TaskListGetSerializer
 
 import uuid
 
@@ -27,9 +28,9 @@ class CourseByTutorAPIView(viewsets.ModelViewSet):
             return Response({"error": "NO_SUCH_TUTOR"}, status=status.HTTP_404_NOT_FOUND)
         courses = Course.objects.filter(owner_uuid=tutor)
 
-        courses_for_tutor = [course.course_name for course in courses]
+        courses_json = CourseGetSerializer(courses, many=True)
 
-        return Response(courses_for_tutor)
+        return Response(courses_json.data)
 
 
     def create(self, request, owner_uuid=None):
@@ -80,10 +81,8 @@ class TopicByCourseAPIView(viewsets.ModelViewSet):
             return Response({"error": "NO_SUCH_COURSE"}, status=status.HTTP_404_NOT_FOUND)
 
         topics = Topic.objects.filter(course_uuid=course)
-
-        all_topic_in_courses = [topic.topic_name for topic in topics]
-
-        return Response(all_topic_in_courses)
+        topic_json = TopicGetSerializer(topics, many=True)
+        return Response(topic_json.data)
 
     def create(self, request, course_uuid=None):
         topic_name = request.data.get('topic_name')
@@ -96,7 +95,7 @@ class TopicByCourseAPIView(viewsets.ModelViewSet):
 
         try:
             topic = Topic(course_uuid=course, topic_name=topic_name)
-            course.save()
+            topic.save()
 
         except IntegrityError as e:
             return Response({"status": "RECORD_ALREADY_EXISTS"}, status=status.HTTP_200_OK)
@@ -133,11 +132,11 @@ class TasklistByTopicAPIView(viewsets.ModelViewSet):
         except Topic.DoesNotExist:
             return Response({"error": "NO_SUCH_TOPIC"}, status=status.HTTP_404_NOT_FOUND)
 
-        tasklists = TaskList.objects.filter(course_uuid=topic)
+        tasklists = TaskList.objects.filter(topic_uuid=topic)
 
-        all_tasklist_in_topics = [tasklist.list_name for tasklist in tasklists]
+        tasklist_json = TaskListGetSerializer(tasklists, many=True)
 
-        return Response(all_tasklist_in_topics)
+        return Response(tasklist_json.data)
 
     def create(self, request, topic_uuid=None):
         tasklist_name = request.data.get('list_name')
@@ -172,12 +171,13 @@ class TasklistByTopicAPIView(viewsets.ModelViewSet):
         tasklist.delete()
         return Response({"status": "SUCCESSFULLY_DELETED"}, status=status.HTTP_204_NO_CONTENT)
 
+
 class TaskByTaskListAPIView(viewsets.ModelViewSet):
     """
     API endpoint, which receives all tasks in a specific task list, can create and delete them.
     """
     queryset = Task.objects.all()
-    serializer_class = TaskListSerializer
+    serializer_class = TaskSerializer
     lookup_field = 'list_uuid'
 
     def list(self, request, list_uuid=None):
@@ -188,35 +188,11 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
 
         tasks = Task.objects.filter(list_uuid=tasklist)
 
+        task_json = TaskSerializer(tasks, many=True)
+
         # all_task_in_tasklist = [tasklist.list_name for tasklist in tasklists]
 
-        return Response(tasks) # or tasks.data
-
-    def create(self, request, *args, **kwargs):
-        # Получаем данные из запроса
-        data = request.data
-
-        # Передаем данные через сериализатор для валидации
-        serializer = PostTutorSerializer(data=data)
-
-        # Хешируем пароль с использованием salt
-        password = data.get("password")
-        password_with_salt = password + salt
-        password_hash = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-        # Создаем новый объект Tutor
-        tutor = Tutor.objects.create(
-            tutor_name=data.get("tutor_name"),
-            tutor_surname=data.get("tutor_surname"),
-            phone_number=phone_number,
-            email=email,
-            password_hash=password_hash,
-            salt=salt
-        )
-        tutor.save()
-        tutor_json = TutorSerializer(tutor)
-
-        return Response(tutor_json.data, status=status.HTTP_201_CREATED)
+        return Response(task_json.data) # or tasks.data
 
     def create(self, request, list_uuid=None):
         if not list_uuid:
@@ -227,11 +203,11 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
 
         try:
             task = Task.objects.create(
-                list_uuid=list_uuid,
-                task_condition=data['task_condition'],
-                task_image=data['task_image'],
-                task_answer=data['task_answer'],
-                criteria=data['criteria']
+                list_uuid=tasklist,
+                task_condition=data.get('task_condition'),
+                task_image=data.get('task_image'),  # Используем data.get()
+                task_answer=data.get('task_answer'),
+                criteria=data.get('criteria')
             )
             task.save()
         except IntegrityError as e:
