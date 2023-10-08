@@ -36,4 +36,6 @@ urlpatterns = [
     path('v1/users/check-authorize/', CheckUserAPIView.as_view({'patch': "update"})),
 
 
+
+
 ]

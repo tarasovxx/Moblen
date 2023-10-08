@@ -54,5 +54,5 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('task_uuid', 'task_condition', 'task_image', 'task_answer', 'criteria')
+        fields = ('task_uuid', 'task_condition', 'task_image', 'task_answer', 'criteria', 'max_ball', 'format')
 

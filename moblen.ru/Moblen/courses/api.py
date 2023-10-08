@@ -187,12 +187,18 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
             return Response({"error": "NO_SUCH_TASKLIST"}, status=status.HTTP_404_NOT_FOUND)
 
         tasks = Task.objects.filter(list_uuid=tasklist)
+        topic_uuid = tasklist.topic_uuid
 
-        task_json = TaskSerializer(tasks, many=True)
+        task_serializer = TaskSerializer(tasks, many=True)
+        topic_serializer = TopicGetSerializer(instance=topic_uuid)
 
+        response_data = {
+            'topic_uuid': topic_serializer.data,  # Включаем topic_uuid в ответ
+            'tasks': task_serializer.data,
+        }
         # all_task_in_tasklist = [tasklist.list_name for tasklist in tasklists]
 
-        return Response(task_json.data) # or tasks.data
+        return Response(response_data) # or tasks.data
 
     def create(self, request, list_uuid=None):
         if not list_uuid:
@@ -207,7 +213,9 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
                 task_condition=data.get('task_condition'),
                 task_image=data.get('task_image'),  # Используем data.get()
                 task_answer=data.get('task_answer'),
-                criteria=data.get('criteria')
+                criteria=data.get('criteria'),
+                max_ball=data.get('max_ball'),
+                format=data.get('format')
             )
             task.save()
         except IntegrityError as e:
@@ -229,3 +237,5 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
 
         task.delete()
         return Response({"status": "SUCCESSFULLY_DELETED"}, status=status.HTTP_204_NO_CONTENT)
+
+
