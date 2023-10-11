@@ -26,6 +26,6 @@ class Task(models.Model):
     list_uuid = models.ForeignKey(TaskList, on_delete=models.CASCADE)
     task_condition = models.TextField()
     task_image = models.BinaryField(null=True, blank=True)
-    task_answer = models.CharField(max_length=50)
     criteria = models.TextField()
+    max_ball = models.IntegerField()
     format = models.TextField()
