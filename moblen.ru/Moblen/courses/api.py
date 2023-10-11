@@ -214,7 +214,6 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
                 task_image=data.get('task_image'),  # Используем data.get()
                 task_answer=data.get('task_answer'),
                 criteria=data.get('criteria'),
-                max_ball=data.get('max_ball'),
                 format=data.get('format')
             )
             task.save()

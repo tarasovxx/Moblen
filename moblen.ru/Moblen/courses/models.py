@@ -28,5 +28,4 @@ class Task(models.Model):
     task_image = models.BinaryField(null=True, blank=True)
     task_answer = models.CharField(max_length=50)
     criteria = models.TextField()
-    max_ball = models.IntegerField()
     format = models.TextField()
