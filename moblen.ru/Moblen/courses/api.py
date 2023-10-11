@@ -133,8 +133,17 @@ class TasklistByTopicAPIView(viewsets.ModelViewSet):
             return Response({"error": "NO_SUCH_TOPIC"}, status=status.HTTP_404_NOT_FOUND)
 
         tasklists = TaskList.objects.filter(topic_uuid=topic)
+        tasklist_data = []
 
-        tasklist_json = TaskListGetSerializer(tasklists, many=True)
+        for tasklist in tasklists:
+            task_count = Task.objects.filter(list_uuid=tasklist).count()
+            tasklist_data.append({
+                "list_uuid": tasklist.list_uuid,
+                "list_name": tasklist.list_name,
+                "task_count": task_count,
+            })
+
+        tasklist_json = TaskListGetSerializer(tasklist_data, many=True)
 
         return Response(tasklist_json.data)
 

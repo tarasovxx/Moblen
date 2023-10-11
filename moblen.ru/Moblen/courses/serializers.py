@@ -41,9 +41,15 @@ class TaskListSerializer(serializers.ModelSerializer):
 
 
 class TaskListGetSerializer(serializers.ModelSerializer):
+    task_count = serializers.SerializerMethodField()
+
     class Meta:
         model = TaskList
-        fields = ('list_uuid', 'list_name')
+        fields = ('list_uuid', 'list_name', 'task_count')
+
+    def get_task_count(self, obj):
+        return Task.objects.filter(list_uuid=obj['list_uuid']).count()
+
 
 
 class TaskSerializer(serializers.ModelSerializer):
