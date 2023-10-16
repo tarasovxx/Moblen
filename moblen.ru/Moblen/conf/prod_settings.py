@@ -4,37 +4,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['moblen.ru', 'www.moblen.ru']
 
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'customers',
-    'groups',
-    # third party package for user registration and authentication endpoints
-    'djoser',
-    # rest API implementation library for django
-    'rest_framework',
-    # JWT authentication backend library
-    'rest_framework_simplejwt',
-    'courses',
-    'corsheaders'
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
