@@ -51,9 +51,6 @@ class Migration(migrations.Migration):
             name='user_permissions',
         ),
         migrations.DeleteModel(
-            name='Group',
-        ),
-        migrations.DeleteModel(
             name='User',
         ),
     ]

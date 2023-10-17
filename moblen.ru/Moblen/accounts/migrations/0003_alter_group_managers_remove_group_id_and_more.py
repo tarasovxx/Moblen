@@ -13,28 +13,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelManagers(
-            name='group',
-            managers=[
-                ('objects', django.contrib.auth.models.GroupManager()),
-            ],
-        ),
-        migrations.RemoveField(
-            model_name='group',
-            name='id',
-        ),
-        migrations.RemoveField(
-            model_name='group',
-            name='last_login',
-        ),
-        migrations.RemoveField(
-            model_name='group',
-            name='password',
-        ),
-        migrations.AddField(
-            model_name='group',
-            name='group_ptr',
-            field=models.OneToOneField(auto_created=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='auth.group'),
-            preserve_default=False,
+        migrations.DeleteModel(
+            name='Group',
         ),
     ]
