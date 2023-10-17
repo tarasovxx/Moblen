@@ -22,6 +22,7 @@ schema_view = get_schema_view(  # new
         path('api/', include('customers.urls')),
         path('api/', include('courses.urls')),
         path('api/', include('groups.urls')),
+        path('api/', include('accounts.urls'))
     ],
     public=True,
     permission_classes=[permissions.AllowAny],
@@ -46,11 +47,12 @@ urlpatterns = [
         schema_view.without_ui(cache_timeout=0),
         name='schema-yaml'),
 
-    path('admin/', admin.site.urls),
+    path('api/admin/', admin.site.urls),
 
     #  Регаем все апихи
     path('api/', include('customers.urls')),
     path('api/', include('courses.urls')),
     path('api/', include('groups.urls')),
+    path('api/', include('accounts.urls')),
 ]
 

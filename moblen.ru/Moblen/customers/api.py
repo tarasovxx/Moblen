@@ -6,12 +6,12 @@ import string
 from django.db import IntegrityError
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Tutor, Student, StudentTutorRelationship
 from .serializers import StudentSerializer, PostStudentSerializer, AttachStudentToTutorSerializer, \
-    StudentTutorRelationshipSerializer, PostTutorSerializer, TutorSerializer, RegStudentByRefLinkSerializer, \
-    CheckUserSerializer, SwagCheckUserSerializer, SwagStudentSerializer
+    StudentTutorRelationshipSerializer, PostTutorSerializer, TutorSerializer, RegStudentByRefLinkSerializer, SwagStudentSerializer
 
 from dotenv import load_dotenv
 
@@ -19,71 +19,28 @@ from groups.models import StudentGroup
 
 from groups.models import StudentGroupRelationship
 
+from .func import post_new_user
+
+from prmsns import IsCurrentTutor, IsCurrentStudent
+
 load_dotenv()
 domain = os.getenv('DOMAIN')
 
-import customers.func
 
-
-class TutorAPIView(viewsets.ModelViewSet):
+class PostTutorAPIView(viewsets.ModelViewSet):
     """
     API endpoint that allows tutors to be viewed or created.
     """
     queryset = Tutor.objects.all()
     serializer_class = PostTutorSerializer
-
+    permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
-        # Получаем данные из запроса
-        data = request.data
+        return post_new_user(request, PostTutorSerializer, "TT")
 
-        # Передаем данные через сериализатор для валидации
-        serializer = PostTutorSerializer(data=data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        login = data.get("login")
-        email = None
-        phone_number = None
-
-        if "@" in login:
-            email = login
-        else:
-            phone_number = login
-
-        if email:
-            existing_tutor = Tutor.objects.filter(email=email).first()
-            if existing_tutor:
-                return Response({"error": "USER_WITH_THIS_EMAIL_ALREADY_EXISTS"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        if phone_number:
-            existing_tutor = Tutor.objects.filter(phone_number=phone_number).first()
-            if existing_tutor:
-                return Response({"error": "USER_WITH_THIS_PHONE_NUMBER_ALREADY_EXISTS"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        # Генерируем случайную строку (salt)
-        salt = ''.join(random.choices(string.ascii_letters + string.digits, k=36))
-
-        # Хешируем пароль с использованием salt
-        password = data.get("password")
-        password_with_salt = password + salt
-        password_hash = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-        # Создаем новый объект Tutor
-        tutor = Tutor.objects.create(
-            tutor_name=data.get("tutor_name"),
-            tutor_surname=data.get("tutor_surname"),
-            phone_number=phone_number,
-            email=email,
-            password_hash=password_hash,
-            salt=salt
-        )
-        tutor.save()
-        tutor_json = TutorSerializer(tutor)
-
-        return Response(tutor_json.data, status=status.HTTP_201_CREATED)
-
+class GetAllTutorsAPIView(viewsets.ModelViewSet):
+    queryset = Tutor.objects.all()
+    permission_classes = [IsAdminUser]
     @swagger_auto_schema(responses={200: TutorSerializer(many=True)})
     def list(self, request, *args, **kwargs):
         tutors = Tutor.objects.all()
@@ -95,75 +52,34 @@ class TutorDetailAPIView(viewsets.ModelViewSet):
     """
     API endpoint that allows a specific tutor to be retrieved, updated, or deleted.
     """
+    permission_classes = [IsAdminUser | IsCurrentTutor]
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
     lookup_field = 'tutor_uuid'
 
 
-class StudentAPIView(viewsets.ModelViewSet):
-    """
-    API endpoint that allows students to be viewed or created.
-    """
+class GetAllStudentsAPIView(viewsets.ModelViewSet):
     queryset = Student.objects.all()
-    serializer_class = PostStudentSerializer
-
-    def create(self, request, *args, **kwargs):
-        # Получаем данные из запроса
-        data = request.data
-
-        # Передаем данные через сериализатор для валидации
-        serializer = PostStudentSerializer(data=data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        login = data.get("login")
-        email = None
-        phone_number = None
-
-        if "@" in login:
-            email = login
-        else:
-            phone_number = login
-
-        if email:
-            existing_student = Student.objects.filter(email=email).first()
-            if existing_student:
-                return Response({"error": "USER_WITH_THIS_EMAIL_ALREADY_EXISTS"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        if phone_number:
-            existing_student = Student.objects.filter(phone_number=phone_number).first()
-            if existing_student:
-                return Response({"error": "USER_WITH_THIS_PHONE_NUMBER_ALREADY_EXISTS"},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        # Генерируем случайную строку (salt)
-        salt = ''.join(random.choices(string.ascii_letters + string.digits, k=36))
-
-        # Хешируем пароль с использованием salt
-        password = data.get("password")
-        password_with_salt = password + salt
-        password_hash = hashlib.sha256(password_with_salt.encode()).hexdigest()
-
-        # Создаем новый объект Student
-        student = Student.objects.create(
-            student_name=data.get("student_name"),
-            student_surname=data.get("student_surname"),
-            phone_number=phone_number,
-            email=email,
-            password_hash=password_hash,
-            salt=salt
-        )
-        student.save()
-        student_json = StudentSerializer(student)
-
-        return Response(student_json.data, status=status.HTTP_201_CREATED)
+    serializer_class = StudentSerializer
+    permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(responses={200: StudentSerializer(many=True)})
     def list(self, request, *args, **kwargs):
         students = Student.objects.all()
         serializer = StudentSerializer(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PostStudentAPIView(viewsets.ModelViewSet):
+    """
+    API endpoint that allows students to be viewed or created.
+    """
+    queryset = Student.objects.all()
+    serializer_class = PostStudentSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        return post_new_user(request, PostStudentSerializer, "ST")
 
 
 class StudentDetailAPIView(viewsets.ModelViewSet):
@@ -173,6 +89,7 @@ class StudentDetailAPIView(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
     lookup_field = 'student_uuid'
+    permission_classes = [IsAdminUser | IsCurrentStudent]
 
     @swagger_auto_schema(responses={200: SwagStudentSerializer})
     def retrieve(self, request, student_uuid=None):
@@ -201,6 +118,7 @@ class AttachStudentToTutorAPIView(viewsets.ModelViewSet):
     queryset = StudentTutorRelationship.objects.all()
     serializer_class = AttachStudentToTutorSerializer
     lookup_field = 'tutor_uuid'
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     def create(self, request, tutor_uuid=None):
         serializer = AttachStudentToTutorSerializer(data=request.data)
@@ -233,6 +151,7 @@ class DeleteStudentFromTutorAPIView(viewsets.ModelViewSet):
     """
     queryset = StudentTutorRelationship.objects.all()
     serializer_class = StudentTutorRelationshipSerializer
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     def destroy(self, request, tutor_uuid=None, student_uuid=None):
         try:
@@ -261,6 +180,7 @@ class GetStudentsByTutorUuidAPIView(AttachStudentToTutorAPIView):
     queryset = StudentTutorRelationship.objects.all()
     serializer_class = StudentTutorRelationshipSerializer
     lookup_field = 'tutor_uuid'
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     @swagger_auto_schema(responses={200: StudentSerializer(many=True)})
     def list(self, request, tutor_uuid=None):
@@ -283,6 +203,7 @@ class GetStudentsByTutorUuidAPIView(AttachStudentToTutorAPIView):
 class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
     queryset = Student.objects.all()
     serializer_class = RegStudentByRefLinkSerializer
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -347,13 +268,5 @@ class RegStudentByRefLinkAPIView(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': 'SUCCESSFULLY_ADDED', "student": student_json.data}, status=status.HTTP_201_CREATED)
-
-
-class CheckUserAPIView(viewsets.ModelViewSet):
-    serializer_class = CheckUserSerializer
-
-    @swagger_auto_schema(responses={200: SwagCheckUserSerializer})
-    def update(self, request):
-        return customers.func.authenticate_user(request, self.serializer_class)
 
 

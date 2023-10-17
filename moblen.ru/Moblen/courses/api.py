@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Course, Topic, Task, TaskList
@@ -9,6 +10,7 @@ from customers.models import Tutor
 from .serializers import CourseSerializer, TopicSerializer, TaskSerializer, TaskListSerializer, \
     CourseGetSerializer, TopicGetSerializer, TaskListGetSerializer
 
+from prmsns import IsCurrentTutor
 import uuid
 
 
@@ -19,7 +21,7 @@ class CourseByTutorAPIView(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     lookup_field = 'owner_uuid'
-
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, owner_uuid=None):
         try:
@@ -74,6 +76,8 @@ class TopicByCourseAPIView(viewsets.ModelViewSet):
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
     lookup_field = 'course_uuid'
+    permission_classes = [IsAuthenticated]
+
     def list(self, request, course_uuid=None):
         try:
             course = Course.objects.get(course_uuid=course_uuid)
@@ -125,6 +129,7 @@ class TasklistByTopicAPIView(viewsets.ModelViewSet):
     queryset = TaskList.objects.all()
     serializer_class = TaskListSerializer
     lookup_field = 'topic_uuid'
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, topic_uuid=None):
         try:
@@ -188,6 +193,7 @@ class TaskByTaskListAPIView(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     lookup_field = 'list_uuid'
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, list_uuid=None):
         try:

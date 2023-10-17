@@ -7,6 +7,7 @@ from django.db import IntegrityError
 from drf_yasg.utils import swagger_auto_schema, no_body
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from customers.models import Tutor, Student
@@ -15,6 +16,7 @@ from .serializers import TutorsGroupSerializer, StudentGroupRelationshipSerializ
     StudentGroupRelationshipCreateSerializer, ReferralLinkSerializer, SwagTutorsGroupSerializer
 from customers.serializers import StudentSerializer
 from dotenv import load_dotenv
+from prmsns import IsCurrentTutor
 
 load_dotenv()
 domain = os.getenv('DOMAIN')
@@ -34,6 +36,7 @@ class TutorsGroupAPIView(viewsets.ModelViewSet):
     queryset = StudentGroup.objects.all()
     serializer_class = TutorsGroupSerializer
     lookup_field = 'owner_uuid'
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     def create(self, request, owner_uuid=None):
         group_name = request.data.get('group_name')
@@ -86,6 +89,7 @@ class TutorsGroupDetailAPIView(viewsets.ModelViewSet):
     queryset = StudentGroup.objects.all()
     serializer_class = TutorsGroupSerializer
     lookup_field = 'group_uuid'
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     @swagger_auto_schema(responses={200: SwagTutorsGroupSerializer})
     def retrieve(self, request, group_uuid=None):
@@ -117,6 +121,7 @@ class StudentInGroup(viewsets.ModelViewSet):
     queryset = StudentGroupRelationship.objects.all()
     serializer_class = StudentGroupRelationshipSerializer
     lookup_field = 'group_uuid'
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     @swagger_auto_schema(request_body=StudentGroupRelationshipCreateSerializer, responses={201: "SUCCESSFULLY_ADDED"})
     def create(self, request, group_uuid=None):
@@ -153,6 +158,7 @@ class DeleteAStudentFromTheGroup(viewsets.ModelViewSet):
     """
     queryset = StudentGroupRelationship.objects.all()
     serializer_class = StudentGroupRelationshipSerializer
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     def destroy(self, request, group_uuid=None, student_uuid=None):
         try:
@@ -180,6 +186,7 @@ class ReferralLinkAPIView(viewsets.ModelViewSet):
     """
     queryset = StudentGroup.objects.all()
     serializer_class = ReferralLinkSerializer
+    permission_classes = [IsAdminUser | IsCurrentTutor]
 
     def retrieve(self, request, group_uuid=None):
         try:
